@@ -13,12 +13,16 @@ public class TestUser {
     @SerializeField
     private int age;
 
+    @SerializeField
+    private byte[] stringBytes;
+
     public TestUser() {
     }
 
     public TestUser(String name, int age) {
         this.name = name;
         this.age = age;
+        this.stringBytes = name.getBytes();
     }
 
     public String getName() {
@@ -27,5 +31,9 @@ public class TestUser {
 
     public int getAge() {
         return age;
+    }
+
+    public byte[] getStringBytes() {
+        return stringBytes;
     }
 }

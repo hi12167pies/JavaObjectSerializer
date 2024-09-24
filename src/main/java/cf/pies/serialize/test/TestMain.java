@@ -9,6 +9,7 @@ public class TestMain {
 
         System.out.println("Name: " + user.getName());
         System.out.println("Age: " + user.getAge());
+        System.out.println("bytes: " + new String(user.getStringBytes()));
 
         byte[] serialized = Serializer.serialize(user);
 
@@ -19,6 +20,7 @@ public class TestMain {
         System.out.println("Deserialized");
         System.out.println("Name: " + deserialized.getName());
         System.out.println("Age: " + deserialized.getAge());
+        System.out.println("bytes: " + new String(deserialized.getStringBytes()));
 
     }
 }
