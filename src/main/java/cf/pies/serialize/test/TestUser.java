@@ -1,7 +1,11 @@
 package cf.pies.serialize.test;
 
+import cf.pies.serialize.SerializeClass;
 import cf.pies.serialize.SerializeField;
 
+@SerializeClass(
+        version = 1
+)
 public class TestUser {
     @SerializeField
     private String name;

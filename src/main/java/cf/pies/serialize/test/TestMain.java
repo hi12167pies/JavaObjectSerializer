@@ -6,7 +6,7 @@ import cf.pies.serialize.Serializer;
 import java.io.IOException;
 
 public class TestMain {
-    public static void main(String[] args) throws ReflectiveOperationException, IOException {
+    public static void main(String[] args) throws Exception {
         TestUser user = new TestUser("John", 15);
 
         System.out.println("Name: " + user.getName());
