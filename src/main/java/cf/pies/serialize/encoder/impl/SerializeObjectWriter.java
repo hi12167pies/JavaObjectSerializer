@@ -10,9 +10,15 @@ import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * The default implementation of {@link SerializeWriter}
+ */
 public class SerializeObjectWriter implements SerializeWriter {
-    @Override
-    public void writeObject(Serializer serializer, DataOutputStream out, Object value) throws Exception {
+    /**
+     * Writes a basic type to the output stream.
+     * @return If a basic type has been written.
+     */
+    private boolean writeBasicType(DataOutputStream out, Object value) throws Exception {
         if (value instanceof String) {
             out.writeUTF((String) value);
         } else if (value instanceof Integer) {
@@ -31,9 +37,23 @@ public class SerializeObjectWriter implements SerializeWriter {
             out.writeFloat((Float) value);
         } else if (value instanceof Character) {
             out.writeFloat((char) value);
+        } else {
+            // No basic types matched
+            return false;
         }
-        // End basic types - Start advanced types.
-        else if (value instanceof List || value instanceof Set || value.getClass().isArray()) {
+        // Basic types matched
+        return true;
+    }
+
+    @Override
+    public void writeObject(Serializer serializer, DataOutputStream out, Object value) throws Exception {
+        // Try the basic types
+        if (writeBasicType(out, value)) {
+            return;
+        }
+
+        // Check for more advanced types.
+        if (value instanceof List || value instanceof Set || value.getClass().isArray()) {
             // Handle any list, set or array
             int length;
 
@@ -67,7 +87,7 @@ public class SerializeObjectWriter implements SerializeWriter {
             out.writeInt(data.length);
             out.write(data);
         } else {
-            throw new UnsupportedDataTypeException("Unsupported type: " + value.getClass());
+            throw new UnsupportedDataTypeException("Type is not supported: " + value.getClass());
         }
     }
 }

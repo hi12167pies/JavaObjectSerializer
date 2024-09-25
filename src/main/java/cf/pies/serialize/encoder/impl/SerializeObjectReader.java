@@ -16,9 +16,11 @@ import java.util.List;
 import java.util.Set;
 
 public class SerializeObjectReader implements SerializeReader {
-    @Override
-    public Object readObject(Deserializer deserializer, DataInputStream in, @Nullable Class<?> type, Field field) throws Exception {
-        // Basic data types
+    /**
+     * Reads a basic object from the {@link DataInputStream}
+     * @return The object that has been read, null if no basic type matched.
+     */
+    private @Nullable Object readBasicObject(DataInputStream in, @Nullable Class<?> type) throws Exception {
         if (type == String.class) {
             return in.readUTF();
         } else if (type == int.class || type == Integer.class) {
@@ -38,8 +40,18 @@ public class SerializeObjectReader implements SerializeReader {
         } else if (type == char.class || type == Character.class) {
             return in.readChar();
         }
+        return null;
+    }
+    @Override
+    public Object readObject(Deserializer deserializer, DataInputStream in, @Nullable Class<?> type, Field field) throws Exception {
+        // Basic data types
+        Object basicObject = readBasicObject(in, type);
+        if (basicObject != null) {
+            return basicObject;
+        }
+
         // Start of advanced data types
-        else if (type.isArray()) {
+        if (type.isArray()) {
             // Arrays - eg. char[]
             int length = in.readInt();
             Object array = Array.newInstance(type.getComponentType(), length);
@@ -81,7 +93,7 @@ public class SerializeObjectReader implements SerializeReader {
 
             return deserializer.deserialize(data, type);
         } else {
-            throw new UnsupportedDataTypeException("Unsupported type: " + type);
+            throw new UnsupportedDataTypeException("Type is not supported: " + type);
         }
     }
 }

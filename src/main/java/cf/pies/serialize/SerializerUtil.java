@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SerializerUtil {
-    public static List<Field> findFields(Class<?> clazz, Class<? extends Annotation> annotation) {
+    /**
+     * Gets all fields in a class that have the specified annotation.
+     */
+    public static List<Field> findFieldsWithAnnotation(Class<?> clazz, Class<? extends Annotation> annotation) {
         List<Field> fields = new ArrayList<>();
 
         // used for getting super class, then next super, etc... until null
@@ -26,6 +29,10 @@ public class SerializerUtil {
         return fields;
     }
 
+    /**
+     * Gets the type of the first generic field.
+     * E.g. used for getting <code>String</code> from <code>List&lt;String&gt;</code>
+     */
     public static Class<?> getFieldGeneric(Field field) throws IOException {
         Class<?> listType = null;
 

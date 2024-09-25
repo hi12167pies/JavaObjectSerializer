@@ -5,11 +5,9 @@ import cf.pies.serialize.annotation.SerializeField;
 import cf.pies.serialize.encoder.SerializeReader;
 import cf.pies.serialize.encoder.impl.SerializeObjectReader;
 import cf.pies.serialize.exception.VersionMismatchException;
-import sun.security.krb5.internal.crypto.Des;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -54,7 +52,7 @@ public class Deserializer {
             throw new VersionMismatchException("Serialized version " + versionIn + " does not match expected version " + serializeClass.version());
         }
 
-        List<Field> fields = SerializerUtil.findFields(object.getClass(), SerializeField.class);
+        List<Field> fields = SerializerUtil.findFieldsWithAnnotation(object.getClass(), SerializeField.class);
 
         for (Field field : fields) {
             field.setAccessible(true);

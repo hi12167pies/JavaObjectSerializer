@@ -35,7 +35,7 @@ public class Serializer {
         SerializeClass serializeClass = object.getClass().getAnnotation(SerializeClass.class);
         int version = serializeClass.version();
 
-        List<Field> fields = SerializerUtil.findFields(object.getClass(), SerializeField.class);
+        List<Field> fields = SerializerUtil.findFieldsWithAnnotation(object.getClass(), SerializeField.class);
 
         ByteOutputStream byteOutputStream = new ByteOutputStream();
         DataOutputStream out = new DataOutputStream(byteOutputStream);
