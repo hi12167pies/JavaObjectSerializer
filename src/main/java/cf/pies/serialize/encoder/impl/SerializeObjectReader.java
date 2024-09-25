@@ -4,6 +4,7 @@ import cf.pies.serialize.Deserializer;
 import cf.pies.serialize.SerializerUtil;
 import cf.pies.serialize.annotation.SerializeClass;
 import cf.pies.serialize.encoder.SerializeReader;
+import cf.pies.serialize.encoder.stream.SerializeInputStream;
 import com.sun.istack.internal.Nullable;
 
 import javax.activation.UnsupportedDataTypeException;
@@ -20,7 +21,7 @@ public class SerializeObjectReader implements SerializeReader {
      * Reads a basic object from the {@link DataInputStream}
      * @return The object that has been read, null if no basic type matched.
      */
-    private @Nullable Object readBasicObject(DataInputStream in, @Nullable Class<?> type) throws Exception {
+    private @Nullable Object readBasicObject(SerializeInputStream in, @Nullable Class<?> type, Field field) throws Exception {
         if (type == String.class) {
             return in.readUTF();
         } else if (type == int.class || type == Integer.class) {
@@ -43,9 +44,9 @@ public class SerializeObjectReader implements SerializeReader {
         return null;
     }
     @Override
-    public Object readObject(Deserializer deserializer, DataInputStream in, @Nullable Class<?> type, Field field) throws Exception {
+    public Object readObject(Deserializer deserializer, SerializeInputStream in, @Nullable Class<?> type, Field field) throws Exception {
         // Basic data types
-        Object basicObject = readBasicObject(in, type);
+        Object basicObject = readBasicObject(in, type, field);
         if (basicObject != null) {
             return basicObject;
         }

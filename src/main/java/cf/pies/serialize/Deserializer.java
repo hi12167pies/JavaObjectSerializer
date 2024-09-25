@@ -4,10 +4,10 @@ import cf.pies.serialize.annotation.SerializeClass;
 import cf.pies.serialize.annotation.SerializeField;
 import cf.pies.serialize.encoder.SerializeReader;
 import cf.pies.serialize.encoder.impl.SerializeObjectReader;
+import cf.pies.serialize.encoder.stream.SerializeInputStream;
 import cf.pies.serialize.exception.VersionMismatchException;
 
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -45,7 +45,7 @@ public class Deserializer {
     public <T> T deserializeToObject(byte[] data, T object) throws Exception {
         SerializeClass serializeClass = object.getClass().getAnnotation(SerializeClass.class);
 
-        DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
+        SerializeInputStream in = new SerializeInputStream(new ByteArrayInputStream(data));
         int versionIn = in.readInt();
 
         if (versionIn != serializeClass.version()) {

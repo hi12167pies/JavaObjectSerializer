@@ -3,10 +3,11 @@ package cf.pies.serialize.encoder.impl;
 import cf.pies.serialize.Serializer;
 import cf.pies.serialize.annotation.SerializeClass;
 import cf.pies.serialize.encoder.SerializeWriter;
+import cf.pies.serialize.encoder.stream.SerializeOutputStream;
 
 import javax.activation.UnsupportedDataTypeException;
-import java.io.DataOutputStream;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +19,7 @@ public class SerializeObjectWriter implements SerializeWriter {
      * Writes a basic type to the output stream.
      * @return If a basic type has been written.
      */
-    private boolean writeBasicType(DataOutputStream out, Object value) throws Exception {
+    private boolean writeBasicType(SerializeOutputStream out, Object value, Field field) throws Exception {
         if (value instanceof String) {
             out.writeUTF((String) value);
         } else if (value instanceof Integer) {
@@ -46,9 +47,9 @@ public class SerializeObjectWriter implements SerializeWriter {
     }
 
     @Override
-    public void writeObject(Serializer serializer, DataOutputStream out, Object value) throws Exception {
+    public void writeObject(Serializer serializer, SerializeOutputStream out, Object value, Field field) throws Exception {
         // Try the basic types
-        if (writeBasicType(out, value)) {
+        if (writeBasicType(out, value, field)) {
             return;
         }
 
@@ -70,15 +71,15 @@ public class SerializeObjectWriter implements SerializeWriter {
             // Write object depending on how the data is formated
             if (value instanceof List) {
                 for (Object item : (List<?>) value) {
-                    writeObject(serializer, out, item);
+                    writeObject(serializer, out, item, null);
                 }
             } else if (value instanceof Set) {
                 for (Object item : (Set<?>) value) {
-                    writeObject(serializer, out, item);
+                    writeObject(serializer, out, item, null);
                 }
             } else {
                 for (int i = 0; i < length; i++) {
-                    writeObject(serializer, out, Array.get(value, i));
+                    writeObject(serializer, out, Array.get(value, i), null);
                 }
             }
         } else if (value.getClass().isAnnotationPresent(SerializeClass.class)) {
