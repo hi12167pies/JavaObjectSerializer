@@ -1,8 +1,9 @@
-package cf.pies.serialize;
+package cf.pies.serialize.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SerializeField {
+public @interface SerializeClass {
+    int version() default 1;
 }

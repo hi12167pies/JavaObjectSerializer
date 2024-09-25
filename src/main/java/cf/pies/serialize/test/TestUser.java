@@ -1,7 +1,7 @@
 package cf.pies.serialize.test;
 
-import cf.pies.serialize.SerializeClass;
-import cf.pies.serialize.SerializeField;
+import cf.pies.serialize.annotation.SerializeClass;
+import cf.pies.serialize.annotation.SerializeField;
 
 import java.util.Arrays;
 
