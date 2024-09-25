@@ -1,15 +1,14 @@
 package cf.pies.serialize;
 
 import cf.pies.serialize.exception.VersionMismatchException;
+import com.sun.istack.internal.Nullable;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.util.List;
+import java.lang.reflect.*;
+import java.util.*;
 
 public class Deserializer {
     /**
@@ -44,21 +43,8 @@ public class Deserializer {
         List<Field> fields = SerializerUtil.findFields(object.getClass(), SerializeField.class);
 
         for (Field field : fields) {
-            Class<?> type = field.getType();
             field.setAccessible(true);
-
-            if (type.isArray()) {
-                int length = in.readInt();
-                Object array = Array.newInstance(type.getComponentType(), length);
-
-                for (int i = 0; i < length; i++) {
-                    Array.set(array, i, readObject(in, type.getComponentType()));
-                }
-
-                field.set(object, array);
-            } else {
-                field.set(object, readObject(in, type));
-            }
+            field.set(object, readObject(in, field.getType(), field));
         }
 
         in.close();
@@ -66,7 +52,11 @@ public class Deserializer {
         return object;
     }
 
-    private static Object readObject(DataInputStream in, Class<?> type) throws IOException {
+    /**
+     * @param field Used for getting types of list, objects, etc
+     */
+    private static Object readObject(DataInputStream in, Class<?> type, @Nullable Field field) throws IOException, ReflectiveOperationException, VersionMismatchException {
+        // Basic data types
         if (type == String.class) {
             return in.readUTF();
         } else if (type == int.class || type == Integer.class) {
@@ -85,6 +75,45 @@ public class Deserializer {
             return in.readFloat();
         } else if (type == char.class || type == Character.class) {
             return in.readChar();
+        }
+        // Start of advanced data types
+        else if (type.isArray()) {
+            int length = in.readInt();
+            Object array = Array.newInstance(type.getComponentType(), length);
+
+            for (int i = 0; i < length; i++) {
+                Array.set(array, i, readObject(in, type.getComponentType(), null));
+            }
+
+            return array;
+        } else if (type == List.class) {
+            int length = in.readInt();
+            List<Object> list = new ArrayList<>(length);
+
+            Class<?> listType = SerializerUtil.getFieldGeneric(field);
+
+            for (int i = 0; i < length; i++) {
+                list.add(readObject(in, listType, null));
+            }
+
+            return list;
+        } else if (type == Set.class) {
+            int length = in.readInt();
+            Set<Object> list = new HashSet<>(length);
+
+            Class<?> listType = SerializerUtil.getFieldGeneric(field);
+
+            for (int i = 0; i < length; i++) {
+                list.add(readObject(in, listType, null));
+            }
+
+            return list;
+        } else if (type.isAnnotationPresent(SerializeClass.class)) {
+            int length = in.readInt();
+            byte[] data = new byte[length];
+            in.read(data, 0, length);
+
+            return Deserializer.deserialize(data, type);
         } else {
             throw new UnsupportedDataTypeException("Unsupported type: " + type);
         }

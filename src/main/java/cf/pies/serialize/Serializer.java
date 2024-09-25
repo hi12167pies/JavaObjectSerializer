@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Set;
 
 public class Serializer {
     /**
@@ -34,19 +35,7 @@ public class Serializer {
             field.setAccessible(true);
             Object value = field.get(object);
 
-            // If value is an array, write the size then the items.
-            if (value.getClass().isArray()) {
-                int length = Array.getLength(value);
-                out.writeInt(length);
-
-                for (int i = 0; i < length; i++) {
-                    writeObject(out, Array.get(value, i));
-                }
-            // Write the data
-            } else {
-                writeObject(out, value);
-            }
-
+            writeObject(out, value);
         }
 
         out.close();
@@ -54,7 +43,7 @@ public class Serializer {
         return byteOutputStream.getBytes();
     }
 
-    private static void writeObject(DataOutputStream out, Object value) throws IOException {
+    private static void writeObject(DataOutputStream out, Object value) throws ReflectiveOperationException, IOException  {
         if (value instanceof String) {
             out.writeUTF((String) value);
         } else if (value instanceof Integer) {
@@ -73,6 +62,40 @@ public class Serializer {
             out.writeFloat((Float) value);
         } else if (value instanceof Character) {
             out.writeFloat((char) value);
+        }
+        // End basic types - Start advanced types.
+        else if (value instanceof List || value instanceof Set || value.getClass().isArray()) {
+            // Handle any list, set or array
+            int length;
+
+            // Get length
+            if (value instanceof List) {
+                length = ((List<?>) value).size();
+            } else if (value instanceof Set) {
+                length = ((Set<?>) value).size();
+            } else length = Array.getLength(value);
+
+            // Write length
+            out.writeInt(length);
+
+            // Write object depending on how the data is formated
+            if (value instanceof List) {
+                for (Object item : (List<?>) value) {
+                    writeObject(out, item);
+                }
+            } else if (value instanceof Set) {
+                for (Object item : (Set<?>) value) {
+                    writeObject(out, item);
+                }
+            } else {
+                for (int i = 0; i < length; i++) {
+                    writeObject(out, Array.get(value, i));
+                }
+            }
+        } else if (value.getClass().isAnnotationPresent(SerializeClass.class)) {
+            byte[] data = Serializer.serialize(value);
+            out.writeInt(data.length);
+            out.write(data);
         } else {
             throw new UnsupportedDataTypeException("Unsupported type: " + value.getClass());
         }

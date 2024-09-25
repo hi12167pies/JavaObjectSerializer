@@ -5,22 +5,15 @@ import cf.pies.serialize.Serializer;
 
 public class TestMain {
     public static void main(String[] args) throws Exception {
-        TestUser user = new TestUser("John", 15);
+        TestData testData = new TestData();
+        testData.addUser(new TestUser("John", 15));
 
-        System.out.println("Name: " + user.getName());
-        System.out.println("Age: " + user.getAge());
-        System.out.println("bytes: " + new String(user.getStringBytes()));
+        testData.printDebug();
 
-        byte[] serialized = Serializer.serialize(user);
+        byte[] serialized = Serializer.serialize(testData);
 
-        System.out.println("---");
+        TestData deserialized = Deserializer.deserialize(serialized, TestData.class);
 
-        TestUser deserialized = Deserializer.deserialize(serialized, TestUser.class);
-
-        System.out.println("Deserialized");
-        System.out.println("Name: " + deserialized.getName());
-        System.out.println("Age: " + deserialized.getAge());
-        System.out.println("bytes: " + new String(deserialized.getStringBytes()));
-
+        deserialized.printDebug();
     }
 }
